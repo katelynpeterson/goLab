@@ -10,10 +10,12 @@ import (
 	"image/jpeg"
 	"image/draw"
 	"os"
+	"math"
 	//"log"
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/themes/dark"
+	"code.google.com/p/graphics-go/graphics"
 )
 
 func init(){
@@ -31,7 +33,7 @@ func appMain(driver gxui.Driver){
 	//import a picture
 
 	width, height := 1000, 1000
-	imgfile, err:= os.Open("doggy.jpg");
+	imgfile, err:= os.Open("doggy.jpg")
 	fmt.Println("Here are the properties of your image file: ")
 	if err != nil{
 		fmt.Println("doggy.jpg file not found!")
@@ -40,9 +42,9 @@ func appMain(driver gxui.Driver){
 
 	defer imgfile.Close()
 
-	img, err := jpeg.Decode(imgfile) //jpeg instead of image?
+	img, err := jpeg.Decode(imgfile)
 	if(err != nil) {panic (err)}
-	editableImage := image.NewRGBA(img.Bounds());
+	editableImage := image.NewRGBA(img.Bounds())
 	draw.Draw(editableImage, editableImage.Bounds(), img, image.Point{0,0}, draw.Src)
 
 	//properties of file
@@ -60,13 +62,37 @@ func appMain(driver gxui.Driver){
 	imgViewer := theme.CreateImage()
 	window := theme.CreateWindow(width, height, "Image Viewer for Image Rotator")
 	window.AddChild(imgViewer)
-	window.OnClose(driver.Terminate)
-	//var texture[40]gxui.Texture;
-	texture := driver.CreateTexture(img, 1.0)
-	imgViewer.SetTexture(texture)
-//	done := false;
 	
-	//rotate func 45 degrees?
+	//var texture[40]gxui.Texture;
+	texture := driver.CreateTexture(editableImage, 1.0)
+	imgViewer.SetTexture(texture)
+	window.OnClose(driver.Terminate)
+
+	graphics.Rotate(editableImage, img, &graphics.RotateOptions{math.Pi/2.0})
+	draw.Draw(editableImage, editableImage.Bounds(), img, image.Point{0,0}, draw.Src)
+
+	
+	//done := false;
+	
+	//rotate func 45 degrees
+	/*i := 0;	
+	timer := time.AfterFunc(pause, func(){
+		i++;
+		if i >= 40{
+			i = -5;
+			done = true;
+		}
+		if (!done){
+			m := image.NewRGBA(image.Rect(0,0, 220,220));
+			draw.Draw(m, m.Bounds(), img, image.Point{0,0}, draw.Src)
+			rotate(m, 0, 0, 220, 220, i);
+			rotate(m, 0, 0, 220, 220, i-10);
+			rotate(m, 0, 0, 220, 220, i-20);
+			rotate(m, 0, 0, 220, 220, i-30);
+			texture[i] = driver.CreateTexture(m, 1.0)
+		}
+	});*/
+	
 	/*driver.Call(func(){
 		if (i >=0){
 			//print
@@ -78,17 +104,5 @@ func appMain(driver gxui.Driver){
 	//split into 4 pieces
 
 	
-	/*log.SetFlags(0)
-        driver.Main(func(s screen.Screen){
-                w := widget.NewSheet(widget.NewImage(img, img.Bounds()))
-		if err := widget.RunWindows(s, w, &widget.RunWindowOptions{
-			NewWindowOptions: screen.NewWindowOptions{
-				Title: "Rotate and chop Doggy Image",
-			}
-		}); err != nil{
-			log.Fatal(err)
-		}
-	})*/
-
 	//save file to disk
 } 
